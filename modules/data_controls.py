@@ -5,8 +5,9 @@ from get_columns import *
 
 #%% boolean map
 '''
-'TRUE' and 'FALSE' will cast to bool.
-Anything else will safe_cast to null, including blanks.
+A mapping from all recognizable boolean entries.
+Maps to 'TRUE' and 'FALSE', which cast to bool in BQ.
+All other entries will safe_cast to null, including blanks.
 '''
 
 boolMap = {
@@ -27,7 +28,7 @@ boolMap = {
 def cast_types(df, dataKey):
     '''
     Casts data types in df according to the data key.
-    Assumes df is all string types to start.
+    STRING is the default data type.
     '''
     dk = dataKey
     
