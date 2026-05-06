@@ -1,7 +1,9 @@
 # ETL System
-**Tech Stack:** Python, pandas, Google BigQuery
-
 An original code system for extracting / importing, transforming, and loading data into the company BigQuery data pipeline. 
+
+This repository hosts selections from that code.
+
+**Tech Stack:** Python, pandas, Google BigQuery
 
 # The Business Problem
 I was building a company-wide commissions data pipeline in BigQuery, and initially chose import through Google Cloud Storage / **GCS**. The platform made it easy to start on this method. Google's data type auto-detection created initial tables from initial spreadsheets. GCS accepted data sheets through drag-and-drop. Loading queries could be stored in-system.
@@ -53,12 +55,12 @@ The system then processes each file iteratively:
 As a result of the view-based architecture of the BigQuery database, the data then propagates the data through downstream pipeline layers.
 
 # System Features and Components
-**New File Detection**
+### New File Detection
 The system detects new files in the library. Any files present in the current directory structure, that were not found in the previous run, are slated for import.
 
 ![New File Detection - slice of execution notebook](images/new-file-detection.png)
 
-**The Master List** 
+### The Master List
 *Any problem in computer science can be solved with another layer of indirection.*
 
 The Master List is the system's ultimate layer of indirection. It gives a profile for each data source, linking it with its necessary resources.
@@ -67,10 +69,10 @@ The Master List is the system's ultimate layer of indirection. It gives a profil
 
 Each run of the system on a data source slices the Master List to a pandas Series called `info`. This series is drawn as an argument in all processing functions, so that all coordinating information is available at each stage - nothing is hard-coded.
 
-**Data Parameters**
+### Data Parameters
 The Master List attributes any special parameters the incoming data needs. For example, most data sheets can be read with the system `general_reader()` function. But some incoming data have special formats - starting below the top row, or existing on a later tab. The `DataReader` argument in the Master List enables the specification of a customized data reading function or configuration for that specific source.
 
-**Data Keys**
+### Data Keys
 Data Keys are spreadsheets that encode the schema for each data source. They define the data type for each column, and whether the column is a part of the table's effective composite key. Data Keys also include columns for example entries and descriptions of columns, allowing them to double as documentation for their data sources.
 
 The defined schema is applied twice: first in the construction of the table, and then in the processing and delivery of subsequent imported data. Using a single source of truth ensures that importing data is always successful.
@@ -79,7 +81,7 @@ The system's default data type is STRING; blank entries for Data Type identify t
 
 ![Snapshot of a Data Key](images/data-key.png)
 
-**Data Type Enforcement** 
+### Data Type Enforcement
 Enforcing data types is key to the success of the system. Each data type needs some degree of specific adjustment - it was not adequate to directly "cast" all types. My data type enforcement function selects all columns of the same specified type, and coerces them to that type.
 
 ```python
@@ -102,7 +104,8 @@ def cast_types(df, dataKey):
     # ...
 ``` 
 
-**Insert Queries** - Data is loaded into long-term Bronze Layer tables with merged-inserts. The system stores and runs those queries remotely. This allows the final step of loading to be performed by the system with one click. It also reduces content in the BigQuery system.
+### Insert Queries
+Data is loaded into long-term Bronze Layer tables with merged-inserts. The system stores and runs those queries remotely. This allows the final step of loading to be performed by the system with one click. It also reduces content in the BigQuery system.
 
 ```sql
 -- T-Mobile Bronze Layer - Merged-Insert
@@ -117,7 +120,8 @@ INSERT (Month, CheckNumber, CustomerName, BAN, ActDate, DeactDate, ReactDate, Pr
 VALUES (S.Month, S.CheckNumber, S.CustomerName, S.BAN, S.ActDate, S.DeactDate, S.ReactDate, S.ProductType, S.ActivityType, S.ServiceUniversalID, S.DealerCode, S.DealerName, S.Coop, S.Spiff, S.Commission, S.Deposit, S.MonthlyAccess, S.PlanCode, S.MarketCode, ...);
 ```
 
-**Loading Data** - Data is loaded into special 'loading tables.' From there, it is appended to long-term tables using remote insert queries.
+### Loading Process
+Data is loaded into special 'loading tables.' From there, it is appended to long-term tables using remote insert queries.
 
 BigQuery provides APIs for connecting remotely with Python. I utilized the `pandas_gbq` package for loading the data. 
 
@@ -127,9 +131,9 @@ def bqImport(df, info, schema):
     Loads pandas df into BQ.
     doc - https://pandas.pydata.org/pandas-docs/version/2.1/reference/api/pandas.DataFrame.to_gbq.html
     Parameters:
-    df: dataframe, the import data.
-    info: series, relevant slice from the master list.
-    schema: list of dicts.
+        df: dataframe, the import data.
+        info: series, relevant slice from the master list.
+        schema: list of dicts.
     ''' 
     groupName='load.'
     table = groupName+info.LoadingTable
