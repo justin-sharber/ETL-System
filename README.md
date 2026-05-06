@@ -85,18 +85,21 @@ Enforcing data types is key to the success of the system. Each data type needs s
 ```python
 #%% function
 def cast_types(df, dataKey):
-'''
-Casts data types in df according to the data key.
-Assumes df is all string types to start.
-'''
-dk = dataKey
-t = 'DATE'
-cols = get_cols(df, dk, t)
-df[cols] = df[cols].apply(lambda col: pd.to_datetime(col, errors='coerce', format='mixed'))
-t = 'FLOAT'
-cols = get_cols(df, dk, t)
-df[cols] = df[cols].apply(lambda x: pd.to_numeric(x, errors='coerce'))
-# ...
+    '''
+    Casts data types in df according to the data key.
+    Assumes df is all string types to start.
+    '''
+
+    dk = dataKey
+
+    t = 'DATE'
+    cols = get_cols(df, dk, t)
+    df[cols] = df[cols].apply(lambda col: pd.to_datetime(col, errors='coerce', format='mixed'))
+
+    t = 'FLOAT'
+    cols = get_cols(df, dk, t)
+    df[cols] = df[cols].apply(lambda x: pd.to_numeric(x, errors='coerce'))
+    # ...
 ``` 
 
 **Insert Queries** - Data is loaded into long-term Bronze Layer tables with merged-inserts. The system stores and runs those queries remotely. This allows the final step of loading to be performed by the system with one click. It also reduces content in the BigQuery system.
@@ -120,17 +123,17 @@ BigQuery provides APIs for connecting remotely with Python. I utilized the `pand
 
 ```python
 def bqImport(df, info, schema):
-'''
-Loads pandas df into BQ.
-doc - https://pandas.pydata.org/pandas-docs/version/2.1/reference/api/pandas.DataFrame.to_gbq.html
-Parameters:
-df: dataframe, the import data.
-info: series, relevant slice from the master list.
-schema: list of dicts.
-''' 
-groupName='load.'
-table = groupName+info.LoadingTable
-pandas_gbq.to_gbq(df, table, ="netspark-database", table_schema=schema, if_exists='replace', credentials=credentials)
+    '''
+    Loads pandas df into BQ.
+    doc - https://pandas.pydata.org/pandas-docs/version/2.1/reference/api/pandas.DataFrame.to_gbq.html
+    Parameters:
+    df: dataframe, the import data.
+    info: series, relevant slice from the master list.
+    schema: list of dicts.
+    ''' 
+    groupName='load.'
+    table = groupName+info.LoadingTable
+    pandas_gbq.to_gbq(df, table, ="netspark-database", table_schema=schema, if_exists='replace', credentials=credentials)
 ```
 
 # Summary
