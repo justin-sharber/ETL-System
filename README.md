@@ -1,4 +1,3 @@
-
 # ETL System
 **Tech Stack:** Python, pandas, Google BigQuery
 
@@ -26,6 +25,7 @@ My solution was a fully custom ETL system. It utilized the power of Python to au
 **Single Source of Truth for Table Schemas** - The pipeline enforces a single canonical schema definition that is used both for transformation logic and destination table definitions. This avoids schema drift and guarantees alignment between produced and stored data. In this system, schemas are defined via **Data Keys**, which act as the ground schema contract / source of truth across all pipeline stages.
 
 ![Data Type Coordination Diagram](images/data-type-coordination.png)
+
 *Diagram for data type coordination, ensuring that newly processed data always matches the destination table schema.*
 
 
