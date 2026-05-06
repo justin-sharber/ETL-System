@@ -3,12 +3,12 @@ An original code system for extracting / importing, transforming, and loading da
 
 This repository hosts selections from that code.
 
-**Tech Stack:** Python, pandas, Google BigQuery
+**Tech Stack: Python | pandas | Google BigQuery**
 
 # The Business Problem
-I was building a company-wide commissions data pipeline in BigQuery, and initially chose import through Google Cloud Storage / **GCS**. The platform made it easy to start on this method. Google's data type auto-detection created initial tables from initial spreadsheets. GCS accepted data sheets through drag-and-drop. Loading queries could be stored in-system.
+I was building a company-wide commissions data pipeline in BigQuery, and needed a method for loading raw data into that systgem.  I initially chose import through Google Cloud Storage / "GCS." The platform made it easy to start on this method. Google's data type auto-detection created initial tables from initial spreadsheets. GCS accepted data sheets through drag-and-drop. Loading queries could be stored in-system.
 
-But this first-pass system exhibited liabilities.
+But this approach exhibited significant liabilities.
 1. Critically, the system depended on a fixed column order which incoming data sources did not respect. Some incoming data changed column order frequently, making this system impossible.
 1. The detection of data types could differ between initial uploads and subsequent uploads. BigQuery was inflexible on detected types and would not transform on the fly.
 1. As the volume of incoming data sources grew, loading through GCS represented a concerning degree of manual work. The system also required adjustments for loading or reloading historical data.
@@ -16,21 +16,19 @@ But this first-pass system exhibited liabilities.
 My solution was a fully custom ETL system. It utilized the power of Python to automate all necessary steps in ETL to a single click.
 
 # Design Principles
-**One-Click Flow** - The system runs from a top-level Jupyter Notebook with one click. Once build for a table is complete and new data has successfully been moved into the appropriate folder, the system performs all steps and loads the data successfully into the BigQuery database **bronze layer**. Given the view-based architecture of that pipeline, the data continues to flow through to final dashboards, unaided.
+**One-Click Flow** - The system runs from a top-level Jupyter Notebook with one click. Once build for a table is complete and new data has successfully been moved into the appropriate folder, the system performs all steps and loads the data successfully into the BigQuery database bronze layer. Given the view-based architecture of that pipeline, the data continues to flow through to final dashboards, unaided.
 
-**Grounding in a Data Library** - I established a company **Data Library** in SharePoint. By reading directly from that library, the system maintains a single source of truth for input data. This connection also allows for easy, immediate data auditing.
+**Grounding in a Data Library** - I established a company **"data library"** in SharePoint. By reading directly from that library, the system maintains a single source of truth for input data. This connection also allows for easy, immediate data auditing.
 
 **Efficient Loading** - The system uses **new file detection** to load only new files, files that have been introduced after the last run of the loading system. With hundreds of spreadsheets and hundreds of thousands of records, efficient loading is an important principle. 
 
 **Modularization** - The system is built with a code base of well-organized modules. Modules define functions or segments of the ETL process.
 
-**Single Source of Truth for Table Schemas** - The pipeline enforces a single canonical schema definition that is used both for transformation logic and destination table definitions. This avoids schema drift and guarantees alignment between produced and stored data. In this system, schemas are defined via **Data Keys**, which act as the ground schema contract / source of truth across all pipeline stages.
+**Single Source of Truth for Table Schemas** - The pipeline enforces a single canonical schema definition that is used both for transformation logic and destination table definitions. This avoids schema drift and guarantees alignment between produced and stored data. In this system, schemas are defined via **"data keys"**, spreadsheets which describe the data sources and specify data types and primary keys.  Data keys act as the ground schema / source of truth across all pipeline stages.
 
 ![Data Type Coordination Diagram](images/data-type-coordination.png)
 
 *Diagram for data type coordination, ensuring that newly processed data always matches the destination table schema.*
-
-
 
 # System Process
 ![ETL System Design](images/etl-flow.png)
